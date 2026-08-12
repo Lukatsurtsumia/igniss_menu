@@ -4,28 +4,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A single-restaurant ("Bella Vista") QR-code menu demo: a static, mobile-app-styled web page rendered inside a phone-frame mockup on desktop, and full-screen edge-to-edge on real phones (see the `max-width: 480px` breakpoint in `css/style.css`, which strips the decorative frame). The scan screen renders a QR code that encodes the page's own URL, so scanning it on another device (same Wi-Fi/network) opens the same page — there's no separate mobile build.
+A single-restaurant ("Bella Vista") digital menu on Laravel + Livewire. A customer scans a physical QR code on their table, which opens this site directly on their phone: a ~3.5s animated intro (brand + Ken Burns hero photo) that auto-advances into a scrollable menu grouped by category. There is no ordering/cart flow, search, or account system — browsing only (photo, name, description, price per dish), by design.
 
 ## Commands
 
-- `npm start` — runs `node server.js`, a zero-dependency static file server (no build step, no dev server framework).
-- No test suite, linter, or bundler config exists in this repo.
+- `php artisan serve` — runs the dev server (default `http://localhost:8000`).
+- `composer install` — install PHP dependencies (no `npm install`/build step — see "No frontend build" below).
+- No test suite has been added yet (`tests/` still holds Laravel's default scaffold, unused).
 
-Server listens on `PORT` env var (default 3000) and prints both the localhost URL and the LAN URL (via network interface lookup) — the LAN URL is what the QR code should encode when testing on a phone.
+## Critical environment constraint: no database driver
+
+This sandbox's PHP has **no `pdo_sqlite` and no running MySQL server** — only `pdo_mysql` is compiled in with nothing listening. `.env` (and `.env.example`) are deliberately set to `DB_CONNECTION=null`, `SESSION_DRIVER=file`, `CACHE_STORE=file`, `QUEUE_CONNECTION=sync` so the app never touches a database. **Do not switch these back to `database`** (Laravel's own scaffold default) without first confirming a real DB driver is available — that exact mistake previously took down every request with a 500 (`StartSession` middleware failing to open a DB-backed session table), so this is not a hypothetical.
+
+There is no Eloquent model, migration, or seeder in this app at all — the menu is intentionally static content in `config/menu.php`, not database-backed. If a real admin-editable menu is ever needed, that's the point to introduce a DB.
+
+## No frontend build
+
+There is no Vite/Tailwind/npm step — `resources/css`, `resources/js`, `package.json`, and `vite.config.js` were deliberately removed from Laravel's default scaffold. Styling is a single hand-authored stylesheet at `public/css/app.css`, linked directly in `resources/views/menu.blade.php` via `asset()`. Fonts (self-hosted Fraunces `.woff2`) and food photos live under `public/fonts/` and `public/img/`. If you add JS/CSS tooling later, that's a deliberate reintroduction, not a restoration of something accidentally deleted.
 
 ## Architecture
 
-Everything runs client-side; `server.js` only serves static files (with directory-traversal protection via `path.normalize` + prefix check) and has no API routes or persistence — there is no backend/database, and "placing an order" is purely a client-side state reset with a fabricated order number.
-
-- `index.html` — single-page app shell. All app "screens" (scan/splash, menu, cart, order confirmation) are `<section class="screen">` siblings inside `.phone`, toggled via a `.active` class rather than routed — see `showScreen()` in app.js. The item-detail view is a modal-style sheet (`#item-overlay`), not a screen.
-- `js/data.js` — static content only: `RESTAURANT` (name/table number), `SPLASH` (hero photo path for the scan screen), `CATEGORIES` (emoji-icon chips), and the `MENU_ITEMS` array (id, price, category tags, dietary tags, `image` path into `assets/img/`). Adding/editing menu items means editing this array directly — there's no CMS or data file per category.
-- `assets/img/`, `assets/fonts/` — self-hosted photos and the Fraunces display-font `.woff2` files (not hotlinked, so the site doesn't depend on a third-party CDN staying up). `css/style.css` declares the `@font-face` rules; `var(--font-display)` applies it to headings/brand text.
-- `js/app.js` — IIFE, no modules/imports. Holds all UI state in a single `state` object (current category, search query, `cart` as `{id: qty}`, the item-sheet's in-progress qty) and re-renders affected DOM regions on every state change (`renderMenu`, `renderCart`, `renderCartBadge`, etc.) rather than using a framework or virtual DOM. `$`/`$$` are local `querySelector(All)` shorthands, not jQuery.
-- `js/vendor/qrcode.bundle.js` — a pre-built bundle of the `qrcode` npm package exposing `window.QRCode`, generated from `build/qr-entry.js` (`import QRCode from 'qrcode'; window.QRCode = QRCode;`). There is no bundler wired into this repo (no esbuild/webpack/rollup dependency) — if `build/qr-entry.js` changes, the bundle in `js/vendor/` must be regenerated manually with an external bundler and the output copied in.
-- `css/style.css` — all styling, including the phone-frame chrome (notch, status bar, tab bar) that simulates a native app.
+- `routes/web.php` — single route, `GET /` → `view('menu')`.
+- `resources/views/menu.blade.php` — the HTML shell (`<head>`, font preload, stylesheet, `@livewireStyles`/`@livewireScripts`) wrapping `<livewire:menu />`.
+- `resources/views/components/⚡menu.blade.php` — the entire app as one Livewire **single-file component** (Livewire v4 convention: an anonymous class in a `<?php ... ?>` block at the top of the file, Blade markup below; the `⚡` filename prefix is what marks it as a component rather than a plain view). Holds one piece of state, `showIntro`, toggled by `skipIntro()` — that method is called either by `wire:click` on the intro screen (tap-to-skip) or by a `setTimeout(() => $wire.skipIntro(), 3500)` in an inline `<script>` (auto-advance). Everything else — category chips, item cards — is server-rendered Blade with no other Livewire round-trips; category navigation is plain `<a href="#cat-...">` anchor scrolling, not Livewire state, since a menu is naturally full-page content, not a filtered view.
+- `config/menu.php` — the only place menu content lives: `restaurant` (name/tagline), `hero_image`, `categories` (id/label), `items` (name/desc/price/image/category). Editing the menu means editing this array directly.
+- `public/img/`, `public/fonts/`, `public/css/app.css` — static assets served directly by Laravel's public disk, referenced via Laravel's `asset()` helper (not Vite's `@vite()`).
 
 ## Conventions to preserve
 
-- Keep `js/app.js` dependency-free and IIFE-scoped (matches `data.js` being loaded as a plain global-scope script before it, with `RESTAURANT`/`CATEGORIES`/`MENU_ITEMS` as implicit globals).
-- Screen transitions go through `showScreen(id)`, which also handles tab-bar visibility/active-state — don't toggle `.screen`/`.active` classes directly from event handlers.
-- Cart quantities are the source of truth in `state.cart`; totals (`cartSubtotal`, badge count) are derived on read, not cached — keep new cart-affecting code consistent with that (call `renderCartBadge()`/`renderCart()` after mutating `state.cart`).
+- Keep the menu database-free unless the user explicitly asks for an editable/admin backend — `config/menu.php` is the intended source of truth for this app's scope.
+- The intro's "video" is actually a CSS Ken Burns pan/zoom on a static photo (`.hero-media img` + `@keyframes hero-kenburns` in `public/css/app.css`), not a literal `<video>` — no stock-video source was reachable from this sandbox when it was built. Swapping in a real video file later is a contained change (replace the `<img>` in the intro block with a `<video autoplay muted loop>`).
+- Respect `prefers-reduced-motion` (already handled for the Ken Burns animation) if you add more motion.
