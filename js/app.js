@@ -20,6 +20,14 @@
     return MENU_ITEMS.find((i) => i.id === id);
   }
 
+  function photoWrapHtml(item, size) {
+    return `
+      <div class="item-photo-wrap">
+        <img class="item-photo" src="${item.image}" alt="${item.name}" loading="lazy" width="${size}" height="${size}" />
+      </div>
+    `;
+  }
+
   function cartCount() {
     return Object.values(state.cart).reduce((a, b) => a + b, 0);
   }
@@ -98,9 +106,7 @@
     const card = document.createElement("div");
     card.className = "item-card";
     card.innerHTML = `
-      <div class="item-photo-wrap">
-        <img class="item-photo" src="${item.image}" alt="${item.name}" loading="lazy" width="96" height="96" />
-      </div>
+      ${photoWrapHtml(item, 96)}
       <div class="item-info">
         <h4>${item.name}</h4>
         <p>${item.desc}</p>
@@ -201,9 +207,7 @@
       const row = document.createElement("div");
       row.className = "cart-item";
       row.innerHTML = `
-        <div class="item-photo-wrap">
-          <img class="item-photo" src="${item.image}" alt="${item.name}" loading="lazy" width="64" height="64" />
-        </div>
+        ${photoWrapHtml(item, 64)}
         <div class="cart-item-info">
           <h4>${item.name}</h4>
           <span>${fmt(item.price)} each</span>
@@ -325,6 +329,7 @@
   function init() {
     $("#table-num").textContent = RESTAURANT.table;
     $("#table-num-2").textContent = RESTAURANT.table;
+    $("#hero-photo").src = SPLASH.poster;
     renderQR();
     renderCategories();
     renderMenu();

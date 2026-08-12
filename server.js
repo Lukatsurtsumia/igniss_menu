@@ -32,11 +32,18 @@ function localIp() {
 }
 
 const server = http.createServer((req, res) => {
-  let filePath = decodeURIComponent(req.url.split("?")[0]);
+  let filePath;
+  try {
+    filePath = decodeURIComponent(req.url.split("?")[0]);
+  } catch {
+    res.writeHead(400);
+    res.end("Bad Request");
+    return;
+  }
   if (filePath === "/") filePath = "/index.html";
   const fullPath = path.normalize(path.join(ROOT, filePath));
 
-  if (!fullPath.startsWith(ROOT)) {
+  if (fullPath !== ROOT && !fullPath.startsWith(ROOT + path.sep)) {
     res.writeHead(403);
     res.end("Forbidden");
     return;

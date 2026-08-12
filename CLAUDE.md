@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A single-restaurant ("Bella Vista") QR-code menu demo: a static, mobile-app-styled web page rendered inside a phone-frame mockup. The scan screen renders a QR code that encodes the page's own URL, so scanning it on another device (same Wi-Fi/network) opens the same page — there's no separate mobile build.
+A single-restaurant ("Bella Vista") QR-code menu demo: a static, mobile-app-styled web page rendered inside a phone-frame mockup on desktop, and full-screen edge-to-edge on real phones (see the `max-width: 480px` breakpoint in `css/style.css`, which strips the decorative frame). The scan screen renders a QR code that encodes the page's own URL, so scanning it on another device (same Wi-Fi/network) opens the same page — there's no separate mobile build.
 
 ## Commands
 
@@ -18,7 +18,8 @@ Server listens on `PORT` env var (default 3000) and prints both the localhost UR
 Everything runs client-side; `server.js` only serves static files (with directory-traversal protection via `path.normalize` + prefix check) and has no API routes or persistence — there is no backend/database, and "placing an order" is purely a client-side state reset with a fabricated order number.
 
 - `index.html` — single-page app shell. All app "screens" (scan/splash, menu, cart, order confirmation) are `<section class="screen">` siblings inside `.phone`, toggled via a `.active` class rather than routed — see `showScreen()` in app.js. The item-detail view is a modal-style sheet (`#item-overlay`), not a screen.
-- `js/data.js` — static content only: `RESTAURANT` (name/table number), `CATEGORIES`, and the `MENU_ITEMS` array (id, price, category tags, dietary tags, emoji-as-icon). Adding/editing menu items means editing this array directly — there's no CMS or data file per category.
+- `js/data.js` — static content only: `RESTAURANT` (name/table number), `SPLASH` (hero photo path for the scan screen), `CATEGORIES` (emoji-icon chips), and the `MENU_ITEMS` array (id, price, category tags, dietary tags, `image` path into `assets/img/`). Adding/editing menu items means editing this array directly — there's no CMS or data file per category.
+- `assets/img/`, `assets/fonts/` — self-hosted photos and the Fraunces display-font `.woff2` files (not hotlinked, so the site doesn't depend on a third-party CDN staying up). `css/style.css` declares the `@font-face` rules; `var(--font-display)` applies it to headings/brand text.
 - `js/app.js` — IIFE, no modules/imports. Holds all UI state in a single `state` object (current category, search query, `cart` as `{id: qty}`, the item-sheet's in-progress qty) and re-renders affected DOM regions on every state change (`renderMenu`, `renderCart`, `renderCartBadge`, etc.) rather than using a framework or virtual DOM. `$`/`$$` are local `querySelector(All)` shorthands, not jQuery.
 - `js/vendor/qrcode.bundle.js` — a pre-built bundle of the `qrcode` npm package exposing `window.QRCode`, generated from `build/qr-entry.js` (`import QRCode from 'qrcode'; window.QRCode = QRCode;`). There is no bundler wired into this repo (no esbuild/webpack/rollup dependency) — if `build/qr-entry.js` changes, the bundle in `js/vendor/` must be regenerated manually with an external bundler and the output copied in.
 - `css/style.css` — all styling, including the phone-frame chrome (notch, status bar, tab bar) that simulates a native app.

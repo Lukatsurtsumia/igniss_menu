@@ -154,6 +154,10 @@ body {
   animation: hero-kenburns 18s ease-in-out infinite alternate;
 }
 
+.scan-screen:not(.active) .hero-media img {
+  animation-play-state: paused;
+}
+
 .hero-scrim {
   position: absolute;
   inset: 0;
@@ -201,6 +205,13 @@ body {
 }
 
 .muted { color: rgba(255,255,255,.6); margin: 4px 0 0; font-size: 13.5px; }
+
+.brand .muted {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 14.5px;
+}
 
 .qr-card {
   background: rgba(255,255,255,.06);
@@ -876,6 +887,14 @@ body {
   }
 
   .screen { top: 0; }
+
+  /* the fake status bar is gone, so the real notch/Dynamic Island area
+     needs to be reserved directly on whichever content sits at the top
+     of each screen (viewport-fit=cover is set in index.html) */
+  .scan-content { padding-top: calc(20px + env(safe-area-inset-top)); }
+  .menu-header { padding-top: calc(6px + env(safe-area-inset-top)); }
+  .sheet-header { padding-top: calc(10px + env(safe-area-inset-top)); }
+  .confirm-content { padding-top: calc(20px + env(safe-area-inset-top)); }
 
   .hint { display: none; }
 }
