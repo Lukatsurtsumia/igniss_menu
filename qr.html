@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bella Vista — Table QR Code</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍽️</text></svg>" />
+<link rel="preload" href="assets/fonts/fraunces-variable.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  /* This page is a print/share utility for the restaurant owner, not part
+     of the customer flow — it isn't linked from the menu itself. */
+  body { display: flex; align-items: center; justify-content: center; min-height: 100dvh; padding: 32px 16px; }
+  .qr-page-card {
+    width: 100%;
+    max-width: 360px;
+    background: linear-gradient(160deg, #1c1a17 0%, #2a241d 55%, #3a2c1c 100%);
+    color: #fff;
+    border-radius: var(--radius-lg);
+    padding: 32px 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="qr-page-card">
+  <div class="brand">
+    <div class="brand-badge">BV</div>
+    <h1>Bella Vista</h1>
+    <p class="muted">Scan to view the menu</p>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-frame">
+      <canvas id="qr-canvas" width="220" height="220"></canvas>
+      <div class="qr-corner tl"></div>
+      <div class="qr-corner tr"></div>
+      <div class="qr-corner bl"></div>
+      <div class="qr-corner br"></div>
+    </div>
+    <p class="qr-url" id="qr-url"></p>
+  </div>
+
+  <p class="qr-caption">Print this and place it on the table.<br/>Customers scan it with their phone camera<br/>to open the menu directly.</p>
+</div>
+
+<script src="js/vendor/qrcode.bundle.js"></script>
+<script>
+  const menuUrl = window.location.origin + window.location.pathname.replace(/qr\.html$/, "");
+  document.getElementById("qr-url").textContent = menuUrl.replace(/^https?:\/\//, "");
+  QRCode.toCanvas(
+    document.getElementById("qr-canvas"),
+    menuUrl,
+    { width: 220, margin: 1, color: { dark: "#1c1a17", light: "#ffffff" } },
+    (err) => { if (err) console.error("QR render failed:", err); }
+  );
+</script>
+</body>
+</html>

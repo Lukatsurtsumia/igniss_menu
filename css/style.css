@@ -49,72 +49,26 @@ h1, h2, h3,
   font-family: var(--font-display);
 }
 
+/* The app itself is the full-viewport surface — a plain responsive
+   website, not a decorative phone mockup. On wide screens it stays
+   centered at mobile width, since every visit starts from a phone
+   camera scan. */
+html { background: var(--bg); }
+
 body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 40px 16px;
-  gap: 18px;
-}
-
-.backdrop {
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(217,98,43,.25), transparent 45%),
-    radial-gradient(circle at 80% 80%, rgba(47,143,91,.18), transparent 45%),
-    #0f1115;
-  z-index: -1;
-}
-
-/* ============ PHONE FRAME ============ */
-.phone {
   position: relative;
-  width: 390px;
-  max-width: 94vw;
-  height: 812px;
-  max-height: 88vh;
-  background: var(--surface-alt);
-  border-radius: 52px;
-  border: 10px solid #060607;
-  box-shadow: var(--shadow), 0 0 0 2px #2a2a2e;
+  width: 100%;
+  max-width: 560px;
+  height: 100dvh;
+  margin: 0 auto;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  background: var(--surface-alt);
 }
-
-.notch {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 26px;
-  background: #060607;
-  border-radius: 0 0 18px 18px;
-  z-index: 50;
-}
-
-.statusbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 28px 4px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink);
-  flex-shrink: 0;
-}
-
-.statusicons { letter-spacing: 2px; }
 
 /* ============ SCREENS ============ */
 .screen {
   position: absolute;
   inset: 0;
-  top: 44px;
   display: flex;
   flex-direction: column;
   background: var(--surface-alt);
@@ -133,11 +87,12 @@ body {
   flex: 1;
 }
 
-/* ============ SCAN SCREEN ============ */
-.scan-screen {
+/* ============ INTRO SCREEN ============ */
+.intro-screen {
   background: linear-gradient(160deg, #1c1a17 0%, #2a241d 55%, #3a2c1c 100%);
   color: #fff;
   justify-content: center;
+  cursor: pointer;
 }
 
 .hero-media {
@@ -154,7 +109,7 @@ body {
   animation: hero-kenburns 18s ease-in-out infinite alternate;
 }
 
-.scan-screen:not(.active) .hero-media img {
+.intro-screen:not(.active) .hero-media img {
   animation-play-state: paused;
 }
 
@@ -170,14 +125,14 @@ body {
   100% { transform: scale(1.12) translate(-1.5%, -1.5%); }
 }
 
-.scan-content {
+.intro-content {
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-  padding: 20px 28px 90px;
+  gap: 22px;
+  padding: 20px 28px;
 }
 
 .brand { text-align: center; }
@@ -778,7 +733,7 @@ body {
 /* ============ BOTTOM TAB BAR ============ */
 .tabbar {
   flex-shrink: 0;
-  display: flex;
+  display: none;
   background: #fff;
   padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
   border-top: 1px solid #efece5;
@@ -844,60 +799,14 @@ body {
   transform: translate(-50%, 0);
 }
 
-.hint {
-  max-width: 390px;
-  color: rgba(255,255,255,.45);
-  font-size: 12px;
-  text-align: center;
-  line-height: 1.5;
-  padding: 0 20px;
-}
-
-@media (max-height: 780px) {
-  .phone { height: 92vh; }
-}
-
-/* ============ REAL-DEVICE VIEWPORT ============
-   Below this width we assume the page is being viewed on an actual phone
-   (e.g. a customer who just scanned the QR code), not as a desktop preview
-   of the mockup. Drop the decorative phone-in-a-phone chrome and let the
-   app fill the real screen edge to edge. */
-@media (max-width: 480px) {
-  body {
-    padding: 0;
-    gap: 0;
-    min-height: 100dvh;
-  }
-
-  .backdrop { display: none; }
-
-  .phone {
-    width: 100vw;
-    max-width: 100vw;
-    height: 100dvh;
-    max-height: 100dvh;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
-  .notch,
-  .statusbar {
-    display: none;
-  }
-
-  .screen { top: 0; }
-
-  /* the fake status bar is gone, so the real notch/Dynamic Island area
-     needs to be reserved directly on whichever content sits at the top
-     of each screen (viewport-fit=cover is set in index.html) */
-  .scan-content { padding-top: calc(20px + env(safe-area-inset-top)); }
-  .menu-header { padding-top: calc(6px + env(safe-area-inset-top)); }
-  .sheet-header { padding-top: calc(10px + env(safe-area-inset-top)); }
-  .confirm-content { padding-top: calc(20px + env(safe-area-inset-top)); }
-
-  .hint { display: none; }
-}
+/* viewport-fit=cover is set in index.html/qr.html, so real devices with a
+   notch/Dynamic Island need the top inset reserved directly on whichever
+   content sits at the top of each screen (there's no fake status bar
+   reserving that space anymore — the app fills the real screen). */
+.intro-content { padding-top: calc(20px + env(safe-area-inset-top)); }
+.menu-header { padding-top: calc(6px + env(safe-area-inset-top)); }
+.sheet-header { padding-top: calc(10px + env(safe-area-inset-top)); }
+.confirm-content { padding-top: calc(20px + env(safe-area-inset-top)); }
 
 /* ============ REDUCED MOTION ============ */
 @media (prefers-reduced-motion: reduce) {

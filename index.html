@@ -3,54 +3,25 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Bella Vista — QR Menu</title>
+<title>Bella Vista — Menu</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍽️</text></svg>" />
 <link rel="preload" href="assets/fonts/fraunces-variable.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-<div class="backdrop"></div>
-
-<div class="phone">
-  <div class="notch"></div>
-
-  <!-- status bar -->
-  <div class="statusbar">
-    <span class="time" id="clock">9:41</span>
-    <span class="statusicons">📶 📡 🔋</span>
-  </div>
-
-  <!-- ============ SCREEN: SCAN / SPLASH ============ -->
-  <section class="screen scan-screen active" id="screen-scan">
+  <!-- ============ SCREEN: INTRO ============ -->
+  <section class="screen intro-screen active" id="screen-intro">
     <div class="hero-media" aria-hidden="true">
       <img id="hero-photo" src="assets/img/hero-table.jpg" alt="" />
       <div class="hero-scrim"></div>
     </div>
-    <div class="scan-content">
+    <div class="intro-content">
       <div class="brand">
         <div class="brand-badge">BV</div>
         <h1>Bella Vista</h1>
         <p class="muted">Fresh • Local • Made to order</p>
       </div>
-
-      <div class="qr-card">
-        <div class="qr-frame">
-          <canvas id="qr-canvas" width="220" height="220"></canvas>
-          <div class="qr-corner tl"></div>
-          <div class="qr-corner tr"></div>
-          <div class="qr-corner bl"></div>
-          <div class="qr-corner br"></div>
-          <div class="scan-line"></div>
-        </div>
-        <p class="qr-caption">Point your camera at the code<br/>to open the menu on your phone</p>
-        <p class="qr-url" id="qr-url">localhost</p>
-      </div>
-
-      <button class="btn-primary" id="btn-enter">
-        <span>Open Menu</span>
-        <span class="chev">→</span>
-      </button>
       <p class="table-pill">🍽️ Table <b id="table-num">12</b></p>
     </div>
   </section>
@@ -159,11 +130,7 @@
   </nav>
 
   <div class="toast" id="toast"></div>
-</div>
 
-<p class="hint">This is a live demo — the QR code above encodes this page's own URL. Scan it with your phone (same Wi-Fi network) to open the menu on mobile.</p>
-
-<script src="js/vendor/qrcode.bundle.js"></script>
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
 </body>

@@ -242,31 +242,13 @@
     toastTimer = setTimeout(() => toast.classList.remove("show"), 1600);
   }
 
-  // ---------- CLOCK ----------
-  function tickClock() {
-    const now = new Date();
-    let h = now.getHours();
-    const m = now.getMinutes();
-    const ampm = h >= 12 ? "PM" : "AM";
-    h = h % 12 || 12;
-    $("#clock").textContent = `${h}:${String(m).padStart(2, "0")}`;
-  }
+  // ---------- INTRO ----------
+  const INTRO_DURATION_MS = 3500;
+  let introTimer = null;
 
-  // ---------- QR CODE ----------
-  function renderQR() {
-    const url = window.location.href.split("#")[0];
-    $("#qr-url").textContent = url.replace(/^https?:\/\//, "");
-    const canvas = $("#qr-canvas");
-    if (window.QRCode) {
-      QRCode.toCanvas(
-        canvas,
-        url,
-        { width: 220, margin: 1, color: { dark: "#1c1a17", light: "#ffffff" } },
-        (err) => {
-          if (err) console.error("QR render failed:", err);
-        }
-      );
-    }
+  function skipIntro() {
+    clearTimeout(introTimer);
+    showScreen("#screen-menu");
   }
 
   // ---------- ORDER ----------
@@ -282,7 +264,7 @@
 
   // ---------- EVENT WIRING ----------
   function wireEvents() {
-    $("#btn-enter").addEventListener("click", () => showScreen("#screen-menu"));
+    $("#screen-intro").addEventListener("click", skipIntro);
 
     $("#search-input").addEventListener("input", (e) => {
       state.query = e.target.value;
@@ -330,13 +312,11 @@
     $("#table-num").textContent = RESTAURANT.table;
     $("#table-num-2").textContent = RESTAURANT.table;
     $("#hero-photo").src = SPLASH.poster;
-    renderQR();
     renderCategories();
     renderMenu();
     renderCartBadge();
     wireEvents();
-    tickClock();
-    setInterval(tickClock, 30000);
+    introTimer = setTimeout(() => showScreen("#screen-menu"), INTRO_DURATION_MS);
   }
 
   document.addEventListener("DOMContentLoaded", init);
