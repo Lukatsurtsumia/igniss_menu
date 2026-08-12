@@ -1,58 +1,51 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Igniss — Digital Menu
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A QR-code digital menu for **Igniss**, a restaurant & cocktail bar in Nice, France. Built with Laravel + Livewire + Alpine.js — no database, no frontend build step.
 
-## About Laravel
+Scan the QR code on the table → animated intro → scrollable menu in French, English, Spanish, or Italian → tap dishes to build a running total to show your server.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Animated intro** — Ken Burns hero photo, rising embers, auto-advances after ~4s (tap to skip).
+- **Photo-first menu** — dishes with a confirmed photo get a full card with tap-to-zoom; everything else is a clean text listing (never a photo of the wrong dish).
+- **4 languages** — auto-detects the visitor's browser language on first load, remembers their choice after.
+- **"Show to your server" selection list** — tap to build a running total with an included-VAT breakdown; entirely client-side (`localStorage`), never submitted anywhere.
+- **Dietary filter** — Vegetarian / Vegan / Gluten-Free / Dairy-Free / Nut-Free, instant client-side filtering. Tags are illustrative demo data (see [`CLAUDE.md`](CLAUDE.md#content-accuracy--read-before-adding-real-menu-items)), not kitchen-verified.
+- **Staff photo manager** (`/manager`, password-gated) — upload or replace a dish photo without touching code or redeploying.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Requirements
 
-## Learning Laravel
+- PHP 8.3+
+- Composer
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+No Node.js, no npm, no database.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Setup
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Set `MENU_MANAGER_PASSWORD` in `.env` before using `/manager` anywhere but locally.
 
-## Contributing
+## Run
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+php artisan serve
+```
 
-## Code of Conduct
+Visit `http://localhost:8000` for the menu, `http://localhost:8000/manager` for the staff photo uploader.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Editing the menu
 
-## Security Vulnerabilities
+All menu content lives in [`config/menu.php`](config/menu.php) (structure: slug, name, price, image, category, dietary tags) and [`lang/{fr,en,es,it}/menu.php`](lang/fr/menu.php) (per-language descriptions and UI text — dish *names* stay constant across languages, matching how real multilingual menus work). No database, no admin panel for text — edit the PHP arrays directly.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Photos can be added through `/manager` without editing code, or by dropping a file in `public/img/` and pointing an item's `image` field at it in `config/menu.php`.
+
+See [`CLAUDE.md`](CLAUDE.md) for the full architecture writeup.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Private project — not licensed for reuse.
