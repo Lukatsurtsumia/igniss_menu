@@ -12,7 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Behind Coolify's reverse proxy, requests arrive as plain HTTP from
+        // its perspective — without this, Laravel generates asset/route URLs
+        // as http:// even though the browser is on https://, which browsers
+        // block as mixed content (page loads unstyled, no CSS/JS).
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
